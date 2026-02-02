@@ -1,5 +1,5 @@
 """
-Copyright (C) 2024 Valentin Rusche
+Copyright (C) 2024 Valentin Rusche, Marius Kortmann
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
 
@@ -14,6 +14,7 @@ from enum import IntEnum
 
 
 class LaneType(IntEnum):
+    # Carla
     Any = -2
     Bidirectional = 512
     Biking = 16
@@ -36,6 +37,22 @@ class LaneType(IntEnum):
     Special3 = 8192
     Stop = 4
     Tram = 32768
+    # Lanelet2
+    Road = 2
+    Highway = 2
+    Play_street = 2
+    Emergency_lane = 2
+    Bus_lane = 2
+    Bicycle_lane = 16
+    Walkway = 32
+    Shared_walkway = 32
+    Crosswalk = 32
+    Stairs = 32
+    Freespace = 128
+    Vegetation = 128
+    Keepout = 128
+    Building = 1
+    Traffic_island = 128
 
 @dataclass
 class Location:

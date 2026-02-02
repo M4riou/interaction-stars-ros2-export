@@ -1,5 +1,5 @@
 """
-Copyright (C) 2024 Valentin Rusche
+Copyright (C) 2024 Valentin Rusche, Marius Kortmann
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or any later version.
 
@@ -9,6 +9,8 @@ You should have received a copy of the GNU Affero General Public License along w
 """
 
 import rclpy
+import threading
+import time
 from rclpy.node import Node
 from rclpy.client import Client
 from rclpy.task import Future
@@ -32,5 +34,26 @@ class AsyncServiceClient(Node):
 
     def send_request(self):
         self.response: Future = self.client.call_async(request=self.request)
-        rclpy.spin_until_future_complete(node=self, future=self.response)
+
+        if not self._wait_future(self.response, timeout_sec=5.0):
+            self.get_logger().error(f"Timeout while waiting for service response")
+            return False
+
         return self.response.result()
+
+    def _wait_future(self, fut, timeout_sec: float) -> bool:
+        done_evt = threading.Event()
+
+        def _done_cb(_):
+            done_evt.set()
+
+        fut.add_done_callback(_done_cb)
+
+        start = time.monotonic()
+        while rclpy.ok(context=self.context):
+            remaining = timeout_sec - (time.monotonic() - start)
+            if remaining <= 0:
+                return False
+            if done_evt.wait(timeout=min(0.1, remaining)):
+                return True
+        return False

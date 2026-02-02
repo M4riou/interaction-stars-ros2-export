@@ -4,7 +4,7 @@
     {
       "label": "Source ROS",
       "type": "shell",
-      "command": ". /opt/ros/humble/setup.sh",
+      "command": ". /opt/ros/kilted/setup.sh",
       "dependsOrder": "sequence",
       "group": "build"
     },
@@ -21,7 +21,7 @@
     {
       "label": "Remove Bridge App Folders",
       "type": "shell",
-      "command": "sudo rm -rf /app/install/share/stars_ros_exporter && sudo rm -rf /app/install/lib/stars_ros_exporter && sudo rm -rf /app/install/lib/python3.8/site-packages/stars_ros_exporter && sudo rm -rf /app/install/lib/python3.8/site-packages/stars_ros_exporter-0.0.1-py3.8.egg-info",
+      "command": "sudo rm -rf /app/install/share/stars_ros_exporter && sudo rm -rf /app/install/lib/stars_ros_exporter && sudo rm -rf /app/install/lib/python3.10/site-packages/stars_ros_exporter && sudo rm -rf /app/install/lib/python3.10/site-packages/stars_ros_exporter-0.0.1-py3.8.egg-info",
       "dependsOrder": "sequence",
       "dependsOn": [
         "Colcon Build"
@@ -31,7 +31,7 @@
     {
       "label": "Move Bridge App Folders",
       "type": "shell",
-      "command": "sudo mv -f ./install/lib/stars_ros_exporter /app/install/lib/ && sudo mv -f ./install/share/stars_ros_exporter /app/install/share/ && sudo mv -f ./install/lib/python3.8/site-packages/stars_ros_exporter /app/install/lib/python3.8/site-packages/ && sudo mv ./install/lib/python3.8/site-packages/stars_ros_exporter-0.0.1-py3.8.egg-info /app/install/lib/python3.8/site-packages/",
+      "command": "sudo mv -f ./install/lib/stars_ros_exporter /app/install/lib/ && sudo mv -f ./install/share/stars_ros_exporter /app/install/share/ && sudo mv -f ./install/lib/python3.10/site-packages/stars_ros_exporter /app/install/lib/python3.10/site-packages/ && sudo mv ./install/lib/python3.10/site-packages/stars_ros_exporter-0.0.1-py3.8.egg-info /app/install/lib/python3.10/site-packages/",
       "dependsOrder": "sequence",
       "dependsOn": [
         "Remove Bridge App Folders"
@@ -55,7 +55,7 @@
       "dependsOn": [
         "Cleanup PWD"
       ],
-      "command": ". /opt/ros/humble/setup.sh && COLCON_CURRENT_PREFIX=/app/install . /app/install/setup.sh && ros2 run stars_ros_exporter stars_ros_exporter",
+      "command": ". /opt/ros/kilted/setup.sh && COLCON_CURRENT_PREFIX=./install . ./install/setup.sh && ros2 run stars_ros_exporter stars_ros_exporter",
       "group": "build"
     }
   ]

@@ -1,4 +1,4 @@
-# Simulation-To-STARS Bridge (CARLA as Example)
+# Simulation-To-STARS Bridge
 
 ## First time setup (Ubuntu 20.04)
 Make sure to have `docker` installed. The `nvidia-docker2-runtime` is needed aswell [as described in the nvidia documentation](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
@@ -28,6 +28,3 @@ The error messages starting with `sh: 1: xdg-user-dir: not found` can be ignored
 
 ## Other repositories used:
 [STARS-ROS-Messages](https://github.com/valentinrusche/stars-ros-messages)
-[CARLA-ROS-Bridge](https://github.com/valentinrusche/ros-bridge)
-[CARLA-STARS-ROS-Mapper](https://github.com/valentinrusche/stars-carla-ros-mapper)
-[OpenDRIVE-Parser](https://github.com/valentinrusche/python-opendrive-parser)

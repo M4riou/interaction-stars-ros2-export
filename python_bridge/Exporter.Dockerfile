@@ -1,29 +1,35 @@
-ARG ROS_DISTRO=humble
+ARG ROS_DISTRO=kilted
 FROM ros:${ROS_DISTRO}
 
 ARG ROS_DISTRO
-ARG STARS_MESSAGES_REPO=https://github.com/valentinrusche/stars-ros-messages.git
+ARG STARS_MESSAGES_REPO=https://github.com/M4riou/stars-ros-messages.git
 ARG ENABLED_FLAG_DEV_MODE=0
-ARG UID
-ARG GID
+ARG UID=2000
+ARG GID=2000
 
 WORKDIR /app
 
 SHELL ["/bin/bash", "-c"]
+
+COPY .vscode /app/.vscode
 
 RUN apt-get update -y && apt-get -y dist-upgrade && \
     apt-get install --no-install-recommends --fix-missing -y \
     software-properties-common \
     wget \
     && rm -rf /var/lib/apt/lists/*
+
+ENV VIRTUAL_ENV=/opt/ros_venv
+RUN apt-get update && apt-get install python3-venv -y && python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN wget https://bootstrap.pypa.io/get-pip.py && python3 get-pip.py && python3 -m pip install --upgrade pip
 COPY requirements.txt /app/requirements.txt
 RUN python3 -m pip install --ignore-installed -r requirements.txt
 
-# create a non root user group with GID 1000
+# create a non root user group with GID 2000
 RUN groupadd -g ${GID} developer
 
-# create a non root user with UID 1000
+# create a non root user with UID 2000
 RUN useradd -u ${UID} -g developer --create-home --groups sudo --shell /bin/bash developer && \
     mkdir -p /etc/sudoers.d && \
     echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \

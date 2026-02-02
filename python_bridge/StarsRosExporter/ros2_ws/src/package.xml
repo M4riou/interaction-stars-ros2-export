@@ -2,9 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>stars_ros_exporter</name>
-  <version>1.0.0</version>
+  <version>1.1.0</version>
   <description>Bridge to read STARS ROS topics and export them to STARS compatible json format</description>
   <maintainer email="valentin.rusche@udo.edu">Valentin Rusche</maintainer>
+  <maintainer email="marius.kortmann@udo.edu">Marius Kortmann</maintainer>
   <license>AGPL-3.0-or-later</license>
 
   <depend>rclpy</depend>
