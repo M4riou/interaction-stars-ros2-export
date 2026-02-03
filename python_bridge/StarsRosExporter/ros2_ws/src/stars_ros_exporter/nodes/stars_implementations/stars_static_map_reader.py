@@ -26,11 +26,12 @@ from .stars_waypoint_client import StarsWaypointClient
 
 class StarsStaticMapReader(LifecycleNode):
 
-    def __init__(self, node_name: str, uuid: str, polling_rate: int, callback_group) -> None:
+    def __init__(self, node_name: str, uuid: str, polling_rate: int, callback_group, context) -> None:
         """Creates a ROS2 topic subscription listening for the current map data and calling _write_static_data_to_file
             to write it to disk"""
-        super().__init__(node_name=node_name, parameter_overrides=[])
+        super().__init__(node_name=node_name, context=context)
         self._uuid = uuid
+        self.ctx = context
         self.polling_rate: int = polling_rate
         self.callback_group = callback_group
 
@@ -65,7 +66,7 @@ class StarsStaticMapReader(LifecycleNode):
 
         self.waypoint_client = StarsWaypointClient(node_name = 'Stars_Waypoint_Client', message_type = StarsGetAllWaypoints,
                                                                 topic_name = '/stars/static/waypoints/get_all_waypoints',
-                                                                callback_group = self.callback_group, timeout_sec = 10.0)
+                                                                callback_group = self.callback_group, context=self.ctx, timeout_sec = 10.0)
 
         return TCR.SUCCESS
 

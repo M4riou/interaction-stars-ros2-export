@@ -32,17 +32,18 @@ from ...util.math_operations import rpy_from_quaternion
 
 class StarsDynamicInfoClient(LifecycleNode):
 
-    def __init__(self, node_name: str, uuid: str, message_type, topic_name: str, callback_group,
+    def __init__(self, node_name: str, uuid: str, message_type, topic_name: str, callback_group, context,
                  tick_time = 0.05, role_name = "ego_vehicle", file_dir = os.getenv(key = "SIMULATION_STARS_DYNAMIC_FILE_DIR")) -> None:
         """Requests all dynamic data available by polling the data each tick"""
-        super().__init__(node_name)
+        super().__init__(node_name, context=context)
         self._uuid = uuid
+        self.ctx = context
 
         self.declare_parameter('scenario', ParameterType.PARAMETER_STRING)
         self.declare_parameter('map_name', ParameterType.PARAMETER_STRING)
 
         self.client: AsyncServiceClient = AsyncServiceClient(node_name = node_name, message_type = message_type,
-                                                             topic_name = topic_name, callback_group = callback_group)
+                                                             topic_name = topic_name, callback_group = callback_group, context=context)
 
         self.dynamic_data_list: List[Dict] = []
         self.is_polling = True
@@ -253,7 +254,7 @@ class StarsDynamicInfoClient(LifecycleNode):
         fut.add_done_callback(_done_cb)
 
         start = time.monotonic()
-        while rclpy.ok(context=self.context):
+        while rclpy.ok(context=self.ctx):
             remaining = timeout_sec - (time.monotonic() - start)
             if remaining <= 0:
                 return False

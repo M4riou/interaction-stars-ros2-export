@@ -22,10 +22,10 @@ from ..async_service_client import AsyncServiceClient
 
 class StarsWaypointClient(AsyncServiceClient):
 
-    def __init__(self, node_name: str, message_type, topic_name: str, callback_group, timeout_sec: float = 10.0) -> None:
+    def __init__(self, node_name: str, message_type, topic_name: str, callback_group, context, timeout_sec: float = 10.0) -> None:
         """Requests all waypoints from the waypoint publisher service asynchronously
             and publishes them to the system when they are available"""
-        super().__init__(node_name=node_name, message_type=message_type, topic_name=topic_name, callback_group=callback_group, timeout_sec=timeout_sec)
+        super().__init__(node_name=node_name, message_type=message_type, topic_name=topic_name, callback_group=callback_group, context=context, timeout_sec=timeout_sec)
         self.result: Union[StarsWaypoint, None] = self.send_request()
 
         # waypoints array inside the waypoints result from the service

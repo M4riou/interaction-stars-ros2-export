@@ -258,7 +258,7 @@ class StarsSupervisor(Node):
         fut.add_done_callback(_done_cb)
 
         start = time.monotonic()
-        while rclpy.ok(context=self.context):
+        while rclpy.ok(context=self.ctx):
             remaining = timeout_sec - (time.monotonic() - start)
             if remaining <= 0:
                 return False

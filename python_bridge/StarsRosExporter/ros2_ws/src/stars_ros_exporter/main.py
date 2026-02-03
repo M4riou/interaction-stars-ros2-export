@@ -26,7 +26,7 @@ from .nodes.stars_implementations.stars_supervisor import StarsSupervisor
 def main() -> None:
     """Runs this projects primary nodes in ROS2"""
     ctx = Context()
-    rclpy.init()
+    rclpy.init(context=ctx)
 
     # we declare all objects here to use them in the except
     node_executor: Union[MultiThreadedExecutor, None] = None
@@ -38,12 +38,13 @@ def main() -> None:
     callback_group = ReentrantCallbackGroup() # allows for the concurrent execution of nodes
 
     try:
-        node_executor: Union[MultiThreadedExecutor,None] = MultiThreadedExecutor(num_threads=5) # needed to allow multiple nodes to be run inside ROS2
+        node_executor: Union[MultiThreadedExecutor,None] = MultiThreadedExecutor(num_threads=8, context=ctx) # needed to allow multiple nodes to be run inside ROS2
 
         if bool_val_of_env_key(env_key="ENABLED_FLAG_STATIC_DATA_LOGGING", default="True"):
             stars_static_map_reader_uuid = str(uuid.uuid4())
             stars_static_map_reader = StarsStaticMapReader(node_name = 'Stars_Static_Map_Reader', uuid=stars_static_map_reader_uuid, polling_rate = 10,
-                                                                                callback_group = callback_group)
+                                                                                callback_group = callback_group,
+                                                                                context=ctx)
             node_executor.add_node(node=stars_static_map_reader)
             workers['Stars_Static_Map_Reader'] = stars_static_map_reader_uuid
 
@@ -51,7 +52,8 @@ def main() -> None:
             stars_dynamic_data_client_uuid = str(uuid.uuid4())
             stars_dynamic_data_client = StarsDynamicInfoClient(node_name = 'Stars_Dynamic_Data_Client', uuid=stars_dynamic_data_client_uuid, message_type = StarsGetActorState,
                                                                     topic_name = '/stars/dynamic/get_actor_state',
-                                                                    callback_group = callback_group)
+                                                                    callback_group = callback_group,
+                                                                    context=ctx)
             node_executor.add_node(node=stars_dynamic_data_client)
             workers['Stars_Dynamic_Data_Client'] = stars_dynamic_data_client_uuid
 
