@@ -32,7 +32,8 @@ from rcl_interfaces.msg import ParameterType
 from std_msgs.msg import String
 
 from rclpy.qos import DurabilityPolicy, ReliabilityPolicy, QoSProfile
-from stars_msgs.msg import StarsSupervisor, StarsReady
+from stars_msgs.msg import StarsSupervisor as StarsSupervisorMsg
+from stars_msgs.msg import StarsReady
 
 class StarsSupervisor(Node):
 
@@ -76,9 +77,9 @@ class StarsSupervisor(Node):
             }
 
         # Create subscriber for Supervisor Messages
-        callback: Callable[[StarsSupervisor], None] = lambda scenario_info: self.__save_scenario(scenario_info=scenario_info)
+        callback: Callable[[StarsSupervisorMsg], None] = lambda scenario_info: self.__save_scenario(scenario_info=scenario_info)
         self.create_subscription(
-            msg_type=StarsSupervisor, topic="/stars/supervisor",
+            msg_type=StarsSupervisorMsg, topic="/stars/supervisor",
             callback=callback,
             qos_profile = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability = DurabilityPolicy.TRANSIENT_LOCAL),
             callback_group = None)
@@ -191,7 +192,7 @@ class StarsSupervisor(Node):
 
     # --- Save Scenario Info
 
-    def __save_scenario(self, scenario_info: StarsSupervisor) -> None:
+    def __save_scenario(self, scenario_info: StarsSupervisorMsg) -> None:
         with self.lock:
             self.current_map = scenario_info.scenario_map_name
             self.current_scenario = scenario_info.scenario_name

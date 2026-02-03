@@ -9,7 +9,6 @@ You should have received a copy of the GNU Affero General Public License along w
 """
 
 from typing import List, Dict, Union, Callable, Set
-from threading import Thread
 import threading
 import os
 import time
@@ -37,13 +36,17 @@ class StarsDynamicInfoClient(LifecycleNode):
         """Requests all dynamic data available by polling the data each tick"""
         super().__init__(node_name, context=context)
         self._uuid = uuid
+        self.callback_group = callback_group
         self.ctx = context
 
-        self.declare_parameter('scenario', ParameterType.PARAMETER_STRING)
-        self.declare_parameter('map_name', ParameterType.PARAMETER_STRING)
+        self.node_name = node_name
+        self.message_type = message_type
+        self.topic_name = topic_name
 
-        self.client: AsyncServiceClient = AsyncServiceClient(node_name = node_name, message_type = message_type,
-                                                             topic_name = topic_name, callback_group = callback_group, context=context)
+        self.declare_parameter('scenario', "")
+        self.declare_parameter('map_name', "")
+
+        self.client: Union[AsyncServiceClient, None] = None
 
         self.dynamic_data_list: List[Dict] = []
         self.is_polling = True
@@ -58,21 +61,15 @@ class StarsDynamicInfoClient(LifecycleNode):
         self.save_counter: int = 0
         self.actor_list: List[StarsActorList] = []
 
-        callback: Callable[[StarsActorList], None] = lambda list: self.__handle_actors(actors = list.actors)
+        self.subscription_callback: Callable[[StarsActorList], None] = lambda list: self.__handle_actors(actors = list.actors)
 
-        self.create_subscription(
-            msg_type = StarsActorList, topic = f"/stars/dynamic/all_vehicle_actors",
-            callback = callback,
-            qos_profile = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability = DurabilityPolicy.TRANSIENT_LOCAL),
-            callback_group = callback_group)
+        self.subscription = None
 
         self.done_publisher = self.create_publisher(String, '/stars/receive/workers_done', 10)
 
         self._timer = None
 
-        self.thread = Thread(target=self.__update_thread)
-
-        self.thread.start()
+        self.get_logger().info(message=f"Successfully created")
 
     # --- Lifecycle hooks
     def on_configure(self, state: State) -> TCR:
@@ -92,6 +89,14 @@ class StarsDynamicInfoClient(LifecycleNode):
         # start reading/publishing
         self._timer = self.create_timer(self.polling_rate, self.__update_thread)
 
+        self.client = AsyncServiceClient(node_name = self.node_name + "_Async_Client", message_type = self.message_type, topic_name = self.topic_name, callback_group = self.callback_group, context=self.ctx)
+
+        self.subscription = self.create_subscription(
+                            msg_type = StarsActorList, topic = f"/stars/dynamic/all_vehicle_actors",
+                            callback = self.subscription_callback,
+                            qos_profile = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability = DurabilityPolicy.TRANSIENT_LOCAL),
+                            callback_group = self.callback_group)
+
         self.get_logger().info('Stars_Dynamic_Data_Client activated')
         return TCR.SUCCESS
 
@@ -99,6 +104,14 @@ class StarsDynamicInfoClient(LifecycleNode):
         if self._timer:
             self._timer.cancel()
             self._timer = None
+
+        if self.client:
+            self.client.destroy_client()
+            self.client = None
+
+        if self.subscription:
+            self.destroy_subscription(self.subscription)
+            self.subscription = None
 
         self.get_logger().info('Stars_Dynamic_Data_Client deactivated')
         return TCR.SUCCESS
@@ -111,6 +124,14 @@ class StarsDynamicInfoClient(LifecycleNode):
         if self._timer:
             self._timer.cancel()
             self._timer = None
+
+        if self.client:
+            self.client.destroy_client()
+            self.client = None
+
+        if self.subscription:
+            self.destroy_subscription(self.subscription)
+            self.subscription = None
 
         self.get_logger().info('Stars_Dynamic_Data_Client shutting down')
         return TCR.SUCCESS

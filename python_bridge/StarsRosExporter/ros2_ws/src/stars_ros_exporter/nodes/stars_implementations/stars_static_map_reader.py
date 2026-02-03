@@ -35,18 +35,14 @@ class StarsStaticMapReader(LifecycleNode):
         self.polling_rate: int = polling_rate
         self.callback_group = callback_group
 
-        self.declare_parameter('scenario', ParameterType.PARAMETER_STRING)
-        self.declare_parameter('map_name', ParameterType.PARAMETER_STRING)
+        self.declare_parameter('scenario', "")
+        self.declare_parameter('map_name', "")
 
         self.is_exporting_done = False
         self.received_world_info = False
 
-        callback: Callable[[StarsWorldInfo], None] = lambda world_info: self.__save_world_info(world_info=world_info)
-        self.create_subscription(
-            msg_type=StarsWorldInfo, topic="/stars/static/world_info",
-            callback=callback,
-            qos_profile = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability = DurabilityPolicy.TRANSIENT_LOCAL),
-            callback_group = callback_group)
+        self.callback: Callable[[StarsWorldInfo], None] = lambda world_info: self.__save_world_info(world_info=world_info)
+        self.subscription = None
 
         self.waypoint_client: StarsWaypointClient = None
         self.done_publisher = self.create_publisher(String, '/stars/receive/workers_done', 10)
@@ -64,15 +60,21 @@ class StarsStaticMapReader(LifecycleNode):
             self.get_logger().error('Scenario information not set')
             return TCR.FAILURE
 
-        self.waypoint_client = StarsWaypointClient(node_name = 'Stars_Waypoint_Client', message_type = StarsGetAllWaypoints,
-                                                                topic_name = '/stars/static/waypoints/get_all_waypoints',
-                                                                callback_group = self.callback_group, context=self.ctx, timeout_sec = 10.0)
-
         return TCR.SUCCESS
 
     def on_activate(self, state: State) -> TCR:
         # start reading/publishing
         self._timer = self.create_timer(self.polling_rate, self.__update_thread)
+
+        self.waypoint_client = StarsWaypointClient(node_name = 'Stars_Waypoint_Client', message_type = StarsGetAllWaypoints,
+                                                                topic_name = '/stars/static/waypoints/get_all_waypoints',
+                                                                callback_group = self.callback_group, context=self.ctx, timeout_sec = 10.0)
+
+        self.subscription = self.create_subscription(
+                            msg_type=StarsWorldInfo, topic="/stars/static/world_info",
+                            callback=self.callback,
+                            qos_profile = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability = DurabilityPolicy.TRANSIENT_LOCAL),
+                            callback_group = self.callback_group)
 
         # Check if the a service is available
         while not self.waypoint_client.wait_for_service(timeout_sec=10.0):
@@ -86,14 +88,18 @@ class StarsStaticMapReader(LifecycleNode):
             self._timer.cancel()
             self._timer = None
 
-        self.get_logger().info('Stars_Static_Map_Reader deactivated')
-        return TCR.SUCCESS
-
-    def on_cleanup(self, state: State) -> TCR:
         if self.waypoint_client:
             self.destroy_client(self.waypoint_client)
             self.waypoint_client = None
 
+        if self.subscription:
+            self.destroy_subscription(self.subscription)
+            self.subscription = None
+
+        self.get_logger().info('Stars_Static_Map_Reader deactivated')
+        return TCR.SUCCESS
+
+    def on_cleanup(self, state: State) -> TCR:
         self.get_logger().info('Stars_Static_Map_Reader cleaned up')
         return TCR.SUCCESS
 
@@ -104,6 +110,9 @@ class StarsStaticMapReader(LifecycleNode):
         if self.waypoint_client:
             self.destroy_client(self.waypoint_client)
             self.waypoint_client = None
+        if self.subscription:
+            self.destroy_subscription(self.subscription)
+            self.subscription = None
         self.get_logger().info('Stars_Static_Map_Reader shutting down')
         return TCR.SUCCESS
 
