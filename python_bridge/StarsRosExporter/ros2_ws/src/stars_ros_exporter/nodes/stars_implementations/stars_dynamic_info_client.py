@@ -89,14 +89,17 @@ class StarsDynamicInfoClient(LifecycleNode):
         try:
             # start reading/publishing
             self._timer = self.create_timer(self.polling_rate, self.__update_thread)
+            self.get_logger().info('Timer created')
 
             self.client = AsyncServiceClient(node_name = self.node_name + "_Async_Client", message_type = self.message_type, topic_name = self.topic_name, callback_group = self.callback_group, context=self.ctx)
+            self.get_logger().info('Async Service Client created')
 
             self.subscription = self.create_subscription(
                                 msg_type = StarsActorList, topic = f"/stars/dynamic/all_vehicle_actors",
                                 callback = self.subscription_callback,
                                 qos_profile = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE, durability = DurabilityPolicy.TRANSIENT_LOCAL),
                                 callback_group = self.callback_group)
+            self.get_logger().info('Subscription created')
 
             self.get_logger().info('Stars_Dynamic_Data_Client activated')
             return TCR.SUCCESS
