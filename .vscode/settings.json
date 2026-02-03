@@ -8,5 +8,6 @@
     "python.analysis.extraPaths": [
         "/opt/ros/kilted/lib/python3.10/site-packages",
         "/app/install/lib/python3.10/site-packages"
-    ]
+    ],
+    "ROS2.distro": "kilted"
 }
