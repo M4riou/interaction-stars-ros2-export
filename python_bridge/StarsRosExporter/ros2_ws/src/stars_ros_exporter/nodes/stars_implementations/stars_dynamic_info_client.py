@@ -186,7 +186,7 @@ class StarsDynamicInfoClient(LifecycleNode):
     def send_request(self, id: int):
         msg = self.message_type.Request()
         msg.id = id
-        response: Future = self.client.call_async(request=msg)
+        response: Future = self.client.client.call_async(request=msg)
 
         if not self._wait_future(response, timeout_sec=5.0):
             self.get_logger().error(f"Timeout while waiting for ActorState of id {id}")
