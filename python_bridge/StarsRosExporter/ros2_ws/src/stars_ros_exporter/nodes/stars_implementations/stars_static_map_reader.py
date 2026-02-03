@@ -53,7 +53,7 @@ class StarsStaticMapReader(LifecycleNode):
 
         self._timer = None
 
-        self.get_logger().info(message=f"Successfully created. Starting processing of static map data.")
+        self.get_logger().info(message=f"Successfully created")
 
     # --- Lifecycle hooks
     def on_configure(self, state: State) -> TCR:
@@ -61,7 +61,7 @@ class StarsStaticMapReader(LifecycleNode):
         map_name = self.get_parameter('map_name').get_parameter_value().string_value
 
         if not scenario or not map_name:
-            self.get_logger().error('scenario information not set')
+            self.get_logger().error('Scenario information not set')
             return TCR.FAILURE
 
         self.waypoint_client = StarsWaypointClient(node_name = 'Stars_Waypoint_Client', message_type = StarsGetAllWaypoints,
@@ -86,7 +86,7 @@ class StarsStaticMapReader(LifecycleNode):
             self._timer.cancel()
             self._timer = None
 
-        self.get_logger().info('Interaction_Static_Data_Publisher deactivated')
+        self.get_logger().info('Stars_Static_Map_Reader deactivated')
         return TCR.SUCCESS
 
     def on_cleanup(self, state: State) -> TCR:
@@ -94,7 +94,7 @@ class StarsStaticMapReader(LifecycleNode):
             self.destroy_client(self.waypoint_client)
             self.waypoint_client = None
 
-        self.get_logger().info('Interaction_Static_Data_Publisher cleaned up')
+        self.get_logger().info('Stars_Static_Map_Reader cleaned up')
         return TCR.SUCCESS
 
     def on_shutdown(self, state: State) -> TCR:
@@ -104,12 +104,12 @@ class StarsStaticMapReader(LifecycleNode):
         if self.waypoint_client:
             self.destroy_client(self.waypoint_client)
             self.waypoint_client = None
-        self.get_logger().info('Interaction_Static_Data_Publisher shutting down')
+        self.get_logger().info('Stars_Static_Map_Reader shutting down')
         return TCR.SUCCESS
 
     # --- Main Work
     def __save_world_info(self, world_info: StarsWorldInfo) -> None:
-        self.get_logger().info(message="Received newest world info.")
+        self.get_logger().info(message="Received newest world info")
         self.world_info: StarsWorldInfo = world_info
         self.received_world_info = True
 

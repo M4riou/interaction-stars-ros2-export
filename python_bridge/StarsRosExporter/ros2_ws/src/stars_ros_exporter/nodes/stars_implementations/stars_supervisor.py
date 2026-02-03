@@ -14,6 +14,7 @@ from typing import Callable
 
 import threading
 import time
+import traceback
 
 from threading import Thread, Condition
 
@@ -33,16 +34,6 @@ from std_msgs.msg import String
 from rclpy.qos import DurabilityPolicy, ReliabilityPolicy, QoSProfile
 from stars_msgs.msg import StarsSupervisor, StarsReady
 
-# TODO
-
-# TODO NOTES
-#   - New Road for every Lanelet? Just group neighbors
-#   - Walkways from Area to Lanelet
-#   - Crosswalks???
-#   For Prädikate
-#   - Remember to evaluate the main points that the creators of interaction had
-#   - Time movin vs Time standing still
-#   - Distance to other agents for Criticality
 class StarsSupervisor(Node):
 
     def __init__(self, node_name: str, workers: dict, executor, context) -> None:

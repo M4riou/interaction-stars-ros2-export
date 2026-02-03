@@ -80,7 +80,7 @@ class StarsDynamicInfoClient(LifecycleNode):
         map_name = self.get_parameter('map_name').get_parameter_value().string_value
 
         if not scenario or not map_name:
-            self.get_logger().error('scenario information not set')
+            self.get_logger().error('Scenario information not set')
             return TCR.FAILURE
 
         if self.json_dir is not None:
@@ -92,7 +92,7 @@ class StarsDynamicInfoClient(LifecycleNode):
         # start reading/publishing
         self._timer = self.create_timer(self.polling_rate, self.__update_thread)
 
-        self.get_logger().info('Stars_Static_Map_Reader activated')
+        self.get_logger().info('Stars_Dynamic_Data_Client activated')
         return TCR.SUCCESS
 
     def on_deactivate(self, state: State) -> TCR:
@@ -100,11 +100,11 @@ class StarsDynamicInfoClient(LifecycleNode):
             self._timer.cancel()
             self._timer = None
 
-        self.get_logger().info('Interaction_Static_Data_Publisher deactivated')
+        self.get_logger().info('Stars_Dynamic_Data_Client deactivated')
         return TCR.SUCCESS
 
     def on_cleanup(self, state: State) -> TCR:
-        self.get_logger().info('Interaction_Static_Data_Publisher cleaned up')
+        self.get_logger().info('Stars_Dynamic_Data_Client cleaned up')
         return TCR.SUCCESS
 
     def on_shutdown(self, state: State) -> TCR:
@@ -112,7 +112,7 @@ class StarsDynamicInfoClient(LifecycleNode):
             self._timer.cancel()
             self._timer = None
 
-        self.get_logger().info('Interaction_Static_Data_Publisher shutting down')
+        self.get_logger().info('Stars_Dynamic_Data_Client shutting down')
         return TCR.SUCCESS
 
     def __update_thread(self) -> None:
@@ -141,7 +141,7 @@ class StarsDynamicInfoClient(LifecycleNode):
         if self._timer:
             self._timer.cancel()
             self._timer = None
-        self.get_logger().info(message="Reported dont to supervisor.")
+        self.get_logger().info(message="Reported done to supervisor.")
 
     def __handle_actors(self, actors) -> None:
         for actor in actors:
