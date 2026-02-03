@@ -17,6 +17,7 @@ import time
 import traceback
 
 from threading import Thread, Condition
+from time import sleep
 
 import rclpy
 from rclpy.node import Node
@@ -111,7 +112,7 @@ class StarsSupervisor(Node):
                         for worker in self.worker_names
                     )
                     if not ready:
-                        break
+                        return
                     self._supervision_started = True
                     self.get_logger().info('All lifecycle and parameter services are available')
 
@@ -133,11 +134,11 @@ class StarsSupervisor(Node):
                 if not self._received_first.is_set():
                     self.get_logger().info('Waiting for first scenario info...')
                     self._received_first.wait()
-                    continue
 
                 if self.scenario_finished.is_set():
                     self.get_logger().info('Waiting for next Scenario...')
-                    break
+                    sleep(0.5)
+                    continue
 
                 scenario = ""
                 map_name = ""
@@ -166,6 +167,12 @@ class StarsSupervisor(Node):
                         return
                     self.get_logger().info(f'{worker} activated')
                 self.get_logger().info(f'All workers activated')
+
+                # Send ready_to_receive message
+                ready_msg = StarsReady()
+                ready_msg.ready_to_receive = False
+                self.publisher.publish(ready_msg)
+                self.get_logger().info(f'Stars ROS Exporter currently processing scenario: {scenario}')
 
                 # 3) Wait for all three to report done
                 with self.done_condition:
