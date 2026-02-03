@@ -213,8 +213,15 @@ class StarsSupervisor(Node):
         with self.lock:
             self.current_map = scenario_info.scenario_map_name
             self.current_scenario = scenario_info.scenario_name
-            self.scenario_finished = scenario_info.scenario_finished
-            self.finished = scenario_info.finished
+            if scenario_info.scenario_finished:
+                self.scenario_finished.set()
+            else:
+                self.scenario_finished.clear()
+
+            if scenario_info.finished:
+                self.finished.set()
+            else:
+                self.finished.clear()
 
     # --- Helpers
 
