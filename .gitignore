@@ -8,6 +8,8 @@
 *.war
 *.ear
 
+.vscode/browse*
+
 stars-storage/
 ROS_BAGS/
 
