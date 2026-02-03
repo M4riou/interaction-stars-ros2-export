@@ -125,15 +125,15 @@ class StarsSupervisor(Node):
 
                     return
 
+                if not self._received_first.is_set():
+                    self.get_logger().info('Waiting for first scenario info...')
+                    self._received_first.wait()
+
                 # Send ready_to_receive message
                 ready_msg = StarsReady()
                 ready_msg.ready_to_receive = True
                 self.publisher.publish(ready_msg)
                 self.get_logger().info(f'Stars ROS Exporter ready to receive next scenario.')
-
-                if not self._received_first.is_set():
-                    self.get_logger().info('Waiting for first scenario info...')
-                    self._received_first.wait()
 
                 if self.scenario_finished.is_set():
                     self.get_logger().info('Waiting for next Scenario...')
