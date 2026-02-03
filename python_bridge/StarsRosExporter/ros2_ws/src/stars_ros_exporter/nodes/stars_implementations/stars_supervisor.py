@@ -59,6 +59,7 @@ class StarsSupervisor(Node):
         self.workers = workers
         self.worker_names = workers.keys()
 
+        self._received_first = threading.Event()
         self._supervision_started = False
 
         self.expected = set(self.worker_names)
@@ -129,6 +130,11 @@ class StarsSupervisor(Node):
                 self.publisher.publish(ready_msg)
                 self.get_logger().info(f'Stars ROS Exporter ready to receive next scenario.')
 
+                if not self._received_first.is_set():
+                    self.get_logger().info('Waiting for first scenario info...')
+                    self._received_first.wait()
+                    continue
+
                 if self.scenario_finished.is_set():
                     self.get_logger().info('Waiting for next Scenario...')
                     break
@@ -193,6 +199,10 @@ class StarsSupervisor(Node):
     # --- Save Scenario Info
 
     def __save_scenario(self, scenario_info: StarsSupervisorMsg) -> None:
+        if not self._received_first.is_set():
+            self.get_logger().info('Received first scenario info.')
+            self._received_first.set()
+
         with self.lock:
             self.current_map = scenario_info.scenario_map_name
             self.current_scenario = scenario_info.scenario_name
