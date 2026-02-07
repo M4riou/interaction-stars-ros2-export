@@ -48,11 +48,11 @@ class LaneType(IntEnum):
     Shared_walkway = 32
     Crosswalk = 32
     Stairs = 32
-    Freespace = 128
+    Freespace = 8
     Vegetation = 128
     Keepout = 128
     Building = 1
-    Traffic_island = 128
+    Traffic_island = 32
 
 @dataclass
 class Location:
